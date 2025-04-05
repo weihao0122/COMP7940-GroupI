@@ -49,7 +49,12 @@ jobs:
         CONTAINER_IDENTITY=$(az container create \
           --resource-group ${{ secrets.RESOURCE_GROUP }} \
           --name comp7940-groupi-bot \
+          --image groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }} \
+          --registry-login-server groupiacr.azurecr.io \
+          --registry-username ${{ secrets.ACR_USERNAME }} \
+          --registry-password ${{ secrets.ACR_PASSWORD }} \
           --assign-identity \
+          --os-type Linux \
           --query 'identity.principalId' -o tsv)
         
         echo "Configuring Key Vault access policy..."
@@ -60,6 +65,10 @@ jobs:
           --resource-group ${{ secrets.RESOURCE_GROUP }}
         
         echo "Access policy configured successfully"
+        
+        # 删除临时容器实例
+        echo "Cleaning up temporary container instance..."
+        az container delete -g ${{ secrets.RESOURCE_GROUP }} -n comp7940-groupi-bot --yes
 
     - name: Deploy to Azure Container Instance
       uses: azure/aci-deploy@v1
