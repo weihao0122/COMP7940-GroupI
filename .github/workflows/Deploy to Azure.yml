@@ -45,30 +45,34 @@ jobs:
 
     - name: Configure Key Vault Access Policy
       run: |
-        echo "Deploying container instance with managed identity..."
-        CONTAINER_IDENTITY=$(az container create \
+        # 创建用户分配的托管标识
+        echo "Creating managed identity..."
+        az identity create \
+          --name comp7940-groupi-bot-identity \
           --resource-group ${{ secrets.RESOURCE_GROUP }} \
-          --name comp7940-groupi-bot \
-          --image groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }} \
-          --registry-login-server groupiacr.azurecr.io \
-          --registry-username ${{ secrets.ACR_USERNAME }} \
-          --registry-password ${{ secrets.ACR_PASSWORD }} \
-          --assign-identity \
-          --os-type Linux \
-          --query 'identity.principalId' -o tsv)
+          --location "East Asia"
         
+        # 获取托管标识的信息
+        IDENTITY_ID=$(az identity show \
+          --name comp7940-groupi-bot-identity \
+          --resource-group ${{ secrets.RESOURCE_GROUP }} \
+          --query id -o tsv)
+        
+        PRINCIPAL_ID=$(az identity show \
+          --name comp7940-groupi-bot-identity \
+          --resource-group ${{ secrets.RESOURCE_GROUP }} \
+          --query principalId -o tsv)
+        
+        # 配置 Key Vault 访问策略
         echo "Configuring Key Vault access policy..."
         az keyvault set-policy \
           --name COMP7940-GroupI-Key \
-          --object-id $CONTAINER_IDENTITY \
+          --object-id $PRINCIPAL_ID \
           --secret-permissions get list \
           --resource-group ${{ secrets.RESOURCE_GROUP }}
         
-        echo "Access policy configured successfully"
-        
-        # 删除临时容器实例
-        echo "Cleaning up temporary container instance..."
-        az container delete -g ${{ secrets.RESOURCE_GROUP }} -n comp7940-groupi-bot --yes
+        # 存储身份 ID 供后续使用
+        echo "IDENTITY_ID=$IDENTITY_ID" >> $GITHUB_ENV
 
     - name: Deploy to Azure Container Instance
       uses: azure/aci-deploy@v1
@@ -84,7 +88,7 @@ jobs:
         restart-policy: Always
         cpu: 1
         memory: 1.5
-        assign-identity: true
+        identity: ${{ env.IDENTITY_ID }}
         secure-environment-variables: |
           KEY_VAULT_NAME=COMP7940-GroupI-Key
           KEY_VAULT_URL=https://comp7940-groupi-key.vault.azure.net/
