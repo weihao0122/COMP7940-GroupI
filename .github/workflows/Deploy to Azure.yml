@@ -28,6 +28,11 @@ jobs:
         docker build -t groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }} .
         docker push groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }}
 
+    - name: Delete existing container instance
+      continue-on-error: true
+      run: |
+        az container delete -g ${{ secrets.RESOURCE_GROUP }} -n comp7940-groupi-bot --yes
+
     - name: Deploy to Azure Container Instance
       uses: azure/aci-deploy@v1
       with:
@@ -36,8 +41,11 @@ jobs:
         image: groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }}
         name: comp7940-groupi-bot
         location: 'East Asia'
-        restart-policy: Always    # 添加这行
-        cpu: 1    # 添加资源限制
+        registry-login-server: groupiacr.azurecr.io    
+        registry-username: ${{ secrets.ACR_USERNAME }}  
+        registry-password: ${{ secrets.ACR_PASSWORD }}  
+        restart-policy: Always
+        cpu: 1
         memory: 1.5
         environment-variables: |
           AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
