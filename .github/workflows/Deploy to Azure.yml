@@ -36,6 +36,9 @@ jobs:
         image: groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }}
         name: comp7940-groupi-bot
         location: 'East Asia'
+        restart-policy: Always    # 添加这行
+        cpu: 1    # 添加资源限制
+        memory: 1.5
         environment-variables: |
           AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}
