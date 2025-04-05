@@ -43,6 +43,24 @@ jobs:
           sleep 30
         fi
 
+    - name: Configure Key Vault Access Policy
+      run: |
+        echo "Deploying container instance with managed identity..."
+        CONTAINER_IDENTITY=$(az container create \
+          --resource-group ${{ secrets.RESOURCE_GROUP }} \
+          --name comp7940-groupi-bot \
+          --assign-identity \
+          --query 'identity.principalId' -o tsv)
+        
+        echo "Configuring Key Vault access policy..."
+        az keyvault set-policy \
+          --name COMP7940-GroupI-Key \
+          --object-id $CONTAINER_IDENTITY \
+          --secret-permissions get list \
+          --resource-group ${{ secrets.RESOURCE_GROUP }}
+        
+        echo "Access policy configured successfully"
+
     - name: Deploy to Azure Container Instance
       uses: azure/aci-deploy@v1
       with:
