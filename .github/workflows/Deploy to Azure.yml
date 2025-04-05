@@ -41,14 +41,17 @@ jobs:
         image: groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }}
         name: comp7940-groupi-bot
         location: 'East Asia'
-        registry-login-server: groupiacr.azurecr.io    
-        registry-username: ${{ secrets.ACR_USERNAME }}  
-        registry-password: ${{ secrets.ACR_PASSWORD }}  
+        registry-login-server: groupiacr.azurecr.io
+        registry-username: ${{ secrets.ACR_USERNAME }}
+        registry-password: ${{ secrets.ACR_PASSWORD }}
         restart-policy: Always
         cpu: 1
         memory: 1.5
-        environment-variables: |
+        secure-environment-variables: |
+          KEY_VAULT_NAME=COMP7940-GroupI-Key
+          KEY_VAULT_URL=https://comp7940-groupi-key.vault.azure.net/
           AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
           AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}
           AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}
+        environment-variables: |
           TZ=Asia/Hong_Kong
