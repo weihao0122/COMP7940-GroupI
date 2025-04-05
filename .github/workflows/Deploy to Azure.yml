@@ -34,7 +34,7 @@ jobs:
         az container delete -g ${{ secrets.RESOURCE_GROUP }} -n comp7940-groupi-bot --yes
 
     - name: Deploy to Azure Container Instance
-      uses: azure/aci-deploy@v2
+      uses: azure/aci-deploy@v1
       with:
         resource-group: ${{ secrets.RESOURCE_GROUP }}
         dns-name-label: comp7940-groupi-bot
@@ -47,7 +47,7 @@ jobs:
         restart-policy: Always
         cpu: 1
         memory: 1.5
-        assign-identity: true    # 启用托管标识
+        assign-identity: true
         secure-environment-variables: |
           KEY_VAULT_NAME=COMP7940-GroupI-Key
           KEY_VAULT_URL=https://comp7940-groupi-key.vault.azure.net/
