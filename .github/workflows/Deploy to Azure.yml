@@ -28,10 +28,20 @@ jobs:
         docker build -t groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }} .
         docker push groupiacr.azurecr.io/comp7940_groupi_bot:${{ github.sha }}
 
-    - name: Delete existing container instance
-      continue-on-error: true
+    - name: Check and stop existing instances
       run: |
-        az container delete -g ${{ secrets.RESOURCE_GROUP }} -n comp7940-groupi-bot --yes
+        echo "Checking for existing instances..."
+        RUNNING_INSTANCES=$(az container list -g ${{ secrets.RESOURCE_GROUP }} --query "[?name=='comp7940-groupi-bot'].name" -o tsv | wc -l)
+        if [ "$RUNNING_INSTANCES" -gt "0" ]; then
+          echo "Stopping existing instance..."
+          az container stop --name comp7940-groupi-bot --resource-group ${{ secrets.RESOURCE_GROUP }}
+          echo "Waiting for instance to stop completely..."
+          sleep 30
+          echo "Deleting existing instance..."
+          az container delete -g ${{ secrets.RESOURCE_GROUP }} -n comp7940-groupi-bot --yes
+          echo "Waiting for deletion to complete..."
+          sleep 30
+        fi
 
     - name: Deploy to Azure Container Instance
       uses: azure/aci-deploy@v1
@@ -56,3 +66,16 @@ jobs:
           AZURE_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}
         environment-variables: |
           TZ=Asia/Hong_Kong
+
+    - name: Verify deployment
+      run: |
+        echo "Waiting for container to start..."
+        sleep 30
+        INSTANCE_COUNT=$(az container list -g ${{ secrets.RESOURCE_GROUP }} --query "[?name=='comp7940-groupi-bot'].name" -o tsv | wc -l)
+        if [ "$INSTANCE_COUNT" -ne "1" ]; then
+          echo "Error: Incorrect number of instances running"
+          exit 1
+        fi
+        echo "Deployment verified: One instance running"
+        echo "Container logs:"
+        az container logs --name comp7940-groupi-bot --resource-group ${{ secrets.RESOURCE_GROUP }}

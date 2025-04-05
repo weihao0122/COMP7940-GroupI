@@ -4,10 +4,13 @@ services:
     image: comp7940_groupi_bot:latest
     container_name: comp7940_groupi_bot
     env_file:
-      - .env    # 使用环境变量文件
+      - .env    
     environment:
       - TZ=Asia/Hong_Kong
-    restart: always
+    deploy:
+      replicas: 1  
+      restart_policy:
+        condition: on-failure
     networks:
       - bot_network
 
