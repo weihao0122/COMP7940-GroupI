@@ -1,0 +1,16 @@
+services:
+  bot:
+    build: .
+    image: comp7940_groupi_bot:latest
+    container_name: comp7940_groupi_bot
+    env_file:
+      - .env    # 使用环境变量文件
+    environment:
+      - TZ=Asia/Hong_Kong
+    restart: always
+    networks:
+      - bot_network
+
+networks:
+  bot_network:
+    driver: bridge 

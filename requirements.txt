@@ -1,0 +1,11 @@
+telegram
+python-telegram-bot==13.7
+configparser
+pymongo
+django
+python-dotenv
+pytz
+requests
+colorama
+azure-identity
+azure-keyvault-secrets

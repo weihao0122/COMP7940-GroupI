@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Azure
+local_secrets.json
+azure_credentials/
+
+# Logs
+*.log
+
+# Docker
+.docker/
+EOL
