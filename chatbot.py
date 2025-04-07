@@ -97,7 +97,7 @@ def handle_message(update: Update, context: CallbackContext) -> None:
             chat_id=update.effective_chat.id, 
             text=f"{ERROR} Failed to process message: {str(e)}"
         )
-
+#/help command
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     help_text = f"""
