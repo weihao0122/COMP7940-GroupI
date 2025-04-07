@@ -163,7 +163,7 @@ class DBHelper:
         
         print(f"{SUCCESS} Update result: {result.modified_count}")
         return result
-
+#save and update users perferences
     def save_user_preferences(self, user_id, preferences):
         """Save or update user preferences"""
         collection = self.db.user_preferences
@@ -177,7 +177,7 @@ class DBHelper:
             }},
             upsert=True
         )
-
+#get users preferences from DB
     def get_user_preferences(self, user_id):
         """Get user preferences"""
         try:
